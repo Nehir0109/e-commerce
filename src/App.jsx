@@ -2,6 +2,7 @@ import { useState } from 'react'
 import './App.css'
 import PageContainer from './container /PageContainer';
 import Header from './components/Header';
+import ProductList from './components/ProductList';
 
 function App() {
   
@@ -9,6 +10,7 @@ function App() {
     <div>
       <PageContainer>
         <Header/>
+        <ProductList/>
       </PageContainer>
     </div>
   )
