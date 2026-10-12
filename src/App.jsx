@@ -2,7 +2,8 @@ import { useState } from 'react'
 import './App.css'
 import PageContainer from './container /PageContainer';
 import Header from './components/Header';
-import ProductList from './components/ProductList';
+import RouterCofig from './config/RouterCofig';
+import Loading from './components/Loading';
 
 function App() {
   
@@ -10,7 +11,8 @@ function App() {
     <div>
       <PageContainer>
         <Header/>
-        <ProductList/>
+        <RouterCofig/>
+        <Loading/>
       </PageContainer>
     </div>
   )
