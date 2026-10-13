@@ -45,9 +45,22 @@ export const basketSlice = createSlice({
             state.products && state.products.map((product) =>{
                 state.totalAmount += product.price * product.count;
             })
+        },
+        removeFromBasket: (state, action) => {
+            //silinecek ürünün id alıp diğer ürünleri koruyoruz
+            state.products = state.products.filter(
+                (product) => String(product.id) !== String(action.payload) //string kullanma sebebimiz id bazen metin bazense sayı olması
+            );
+            //Güncel sepeti local storage kaydet
+            writeFromBasketToStorage(state.products);
+            //silme işleminden sonra total tutarı yeniden hesaplıyoruz 
+            state.totalAmount = 0;
+            state.products.forEach((product) => {
+                state.totalAmount += product.price * product.count;
+            });
         }
     }
 })
 
-export const {addToBasket , setDrawer, calculateBasket} = basketSlice.actions
-export default basketSlice.reducer
+export const {addToBasket , setDrawer, calculateBasket, removeFromBasket} = basketSlice.actions;
+export default basketSlice.reducer;
