@@ -15,36 +15,50 @@ const initialState = {
     totalAmount: 0
 }
 
+//Sepeti local storage'a kaydet
 const writeFromBasketToStorage = (basket) => {
     localStorage.setItem("basket", JSON.stringify(basket))
+}
+
+//Sepetin toplam tutarını hesapla
+const calculateTotal = (products) => {
+    return products.reduce((total, product) => {
+        return total + product.price * product.count
+    },0)
 }
 
 export const basketSlice = createSlice({
     name: "basket",
     initialState,
     reducers: {
-        addToBasket : (state, action) => {
-            const findProduct = state.products && state.products.find((product) => product.id === action.payload.id);
-            if(findProduct){
-                // daha önceden eklenmiştir
-                const extractedProducts = state.products.filter((product) => product.id != action.payload.id);
-                findProduct.count += action.payload.count;
-                state.products = [...extractedProducts , findProduct];
-                writeFromBasketToStorage(state.products);
+        //Sepete ürün ekleme
+        addToBasket: (state, action) => {
+            const findProduct = state.products.find(
+                (product) =>
+                    String(product.id) === String(action.payload.id)
+            )
 
-            }else {
-                state.products = [...state.products , action.payload];
-                writeFromBasketToStorage(state.products);
+            if (findProduct) {
+                const extractedProducts = state.products.filter(
+                    (product) =>
+                        String(product.id) !== String(action.payload.id)
+                )
+
+                findProduct.count += action.payload.count
+
+                state.products = [...extractedProducts, findProduct]
+            } else {
+                state.products.push(action.payload)
             }
+
+            writeFromBasketToStorage(state.products)
+            state.totalAmount = calculateTotal(state.products)
         },
         setDrawer: (state) => {
             state.drawer = !state.drawer;
         },
         calculateBasket : (state) => {
-            state.totalAmount = 0;
-            state.products && state.products.map((product) =>{
-                state.totalAmount += product.price * product.count;
-            })
+            state.totalAmount = calculateTotal(state.products)
         },
         removeFromBasket: (state, action) => {
             //silinecek ürünün id alıp diğer ürünleri koruyoruz
@@ -54,13 +68,36 @@ export const basketSlice = createSlice({
             //Güncel sepeti local storage kaydet
             writeFromBasketToStorage(state.products);
             //silme işleminden sonra total tutarı yeniden hesaplıyoruz 
-            state.totalAmount = 0;
-            state.products.forEach((product) => {
-                state.totalAmount += product.price * product.count;
-            });
+            state.totalAmount = calculateTotal(state.products);
+        },
+        //Ürün adedini artırma
+        increaseProductCount: (state,action) => {
+            const product = state.products.find(
+                (product) => String(product.id) === String(action.payload)
+            )
+            if(product){
+                product.count += 1
+            }
+            writeFromBasketToStorage(state.products)
+            state.totalAmount = calculateTotal(state.products)
+        },
+        //Ürün adedini azaltma
+        decreaseProductCount: (state, action) => {
+            const product = state.products.find(
+                (product) =>
+                    String(product.id) === String(action.payload)
+            )
+
+            // Adet 1'in altına düşmesin
+            if (product && product.count > 1) {
+                product.count -= 1
+            }
+
+            writeFromBasketToStorage(state.products)
+            state.totalAmount = calculateTotal(state.products)
         }
     }
 })
 
-export const {addToBasket , setDrawer, calculateBasket, removeFromBasket} = basketSlice.actions;
+export const {addToBasket , setDrawer, calculateBasket, removeFromBasket, increaseProductCount, decreaseProductCount} = basketSlice.actions;
 export default basketSlice.reducer;
